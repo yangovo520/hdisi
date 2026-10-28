@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#ededed">
+<title>515：熄灯后，请勿开门</title>
+<style>
+:root{--bg:#ededed;--green:#95ec69;--ink:#191919;--muted:#8a8a8a;--red:#a52d36;--panel:#fff;--line:#e7e7e7}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#d8d8d8;color:var(--ink)}
+body{display:flex;justify-content:center}.app{width:100%;max-width:480px;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.top{height:58px;background:#ededed;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #d8d8d8;flex-shrink:0}
+.top .title{font-weight:650;font-size:17px}.top .sub{font-size:11px;color:#777;margin-top:3px}.iconbtn{border:0;background:transparent;font-size:22px;padding:7px;color:#222;cursor:pointer}
+.status{height:28px;background:#f6f6f6;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;flex-shrink:0}
+.tabs{display:flex;background:#f8f8f8;border-bottom:1px solid #ddd;flex-shrink:0}
+.tab{flex:1;border:0;background:transparent;padding:12px 2px;font-size:13px;color:#777;border-bottom:2px solid transparent}.tab.active{color:#222;border-bottom-color:#222;font-weight:650}
+#chatView{display:flex;flex-direction:column;flex:1;min-height:0}.chat{padding:14px 12px 8px;overflow:auto;flex:1;scroll-behavior:smooth}
+.time{text-align:center;color:#aaa;font-size:11px;margin:14px 0}.notice{max-width:90%;margin:12px auto;background:#d9d9d9;color:#656565;font-size:12px;line-height:1.6;padding:7px 11px;border-radius:5px;text-align:center}
+.msg{display:flex;gap:8px;margin:13px 0;align-items:flex-start;animation:fade .22s ease}.msg.me{flex-direction:row-reverse}.avatar{width:37px;height:37px;flex-shrink:0;border-radius:5px;background:#c7d2d8;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}.avatar.me{background:#b8d7a6}.bubblewrap{max-width:78%;min-width:0}.name{font-size:11px;color:#888;margin:0 0 5px}.me .name{text-align:right}.bubble{font-size:14px;line-height:1.65;background:#fff;border-radius:4px;padding:9px 11px;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px #00000008}.me .bubble{background:var(--green)}.bubble.system{background:#e2e2e2;color:#555}.bubble.voice{min-width:130px;cursor:pointer}.voice small{display:block;color:#777;font-size:11px;margin-top:3px}.voiceicon{font-size:18px;margin-right:8px}
+.composer{background:#f7f7f7;border-top:1px solid #d7d7d7;padding:10px 12px 14px;flex-shrink:0}.choices{display:flex;flex-direction:column;gap:8px}.choice{border:1px solid #d5d5d5;background:#fff;border-radius:8px;padding:12px 13px;text-align:left;font-size:13px;line-height:1.45;color:#222;cursor:pointer;transition:transform .08s,border .15s}.choice:active{transform:scale(.99)}.choice:disabled{opacity:.45}.hint{font-size:11px;color:#999;text-align:center;margin-top:9px}
+.panel{display:none;flex:1;overflow:auto;padding:15px}.panel.show{display:block}.card{background:#fff;border-radius:10px;padding:15px;margin-bottom:12px;box-shadow:0 1px 3px #00000008}.card h3{font-size:15px;margin:0 0 8px}.card p{font-size:13px;line-height:1.75;margin:6px 0;color:#444}.tag{display:inline-block;font-size:10px;color:#8a3439;background:#f7e9e9;border-radius:4px;padding:3px 6px;margin-right:5px}.clue{border-left:3px solid #a52d36;padding:2px 0 2px 10px;margin:13px 0}.clue strong{font-size:13px}.clue p{margin:4px 0;color:#777;font-size:12px;line-height:1.6}.empty{color:#999;text-align:center;font-size:13px;padding:45px 15px;line-height:1.8}
+.bottom{display:flex;gap:8px;margin-top:12px}.smallbtn{flex:1;background:#fff;border:1px solid #ddd;border-radius:7px;padding:10px;font-size:12px}
+.overlay{position:absolute;inset:0;background:#000b;z-index:10;display:none;align-items:center;justify-content:center;padding:22px}.overlay.show{display:flex}.modal{background:#f7f7f7;border-radius:12px;width:100%;padding:20px;max-height:85vh;overflow:auto}.modal h2{font-size:19px;margin:0 0 10px}.modal p{font-size:13px;line-height:1.8;color:#444}.modal button{border:0;background:#222;color:#fff;border-radius:7px;padding:11px 14px;margin-top:8px;width:100%}
+.glitch{animation:glitch .45s 2}.flash{position:absolute;inset:0;background:#fff;z-index:9;pointer-events:none;opacity:0}.flash.go{animation:flash .5s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}@keyframes flash{0%{opacity:0}15%{opacity:.9}35%{opacity:0}60%{opacity:.45}100%{opacity:0}}@keyframes glitch{0%,100%{transform:translateX(0)}20%{transform:translateX(-2px)}40%{transform:translateX(2px)}60%{filter:contrast(1.5)}80%{transform:translateX(-1px)}}
+.intro{padding:22px 18px;background:#17191d;color:#eee;min-height:100dvh;display:flex;flex-direction:column;justify-content:center}.intro .eyebrow{font-size:11px;letter-spacing:3px;color:#b8a6a6}.intro h1{font-size:30px;line-height:1.25;letter-spacing:1px;margin:18px 0 12px}.intro .desc{font-size:13px;line-height:1.9;color:#c3c3c3}.intro .warning{border-left:2px solid #a52d36;padding-left:12px;margin:24px 0;color:#d7caca;font-size:12px;line-height:1.8}.intro button{background:#eee;color:#17191d;border:0;border-radius:8px;padding:14px;font-size:14px;font-weight:650;margin-top:12px}.intro .secondary{background:transparent;border:1px solid #555;color:#ddd}.hidden{display:none!important}
+@media(min-width:500px){body{padding:16px 0}.app{min-height:calc(100dvh - 32px);height:calc(100dvh - 32px);border-radius:12px;box-shadow:0 8px 35px #0002}.intro{min-height:calc(100dvh - 32px)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="intro" class="intro">
+    <div class="eyebrow">FICTIONAL CAMPUS HORROR · CHAT NOVEL</div>
+    <h1>515<br>熄灯后，请勿开门</h1>
+    <div class="desc">浙江旅游职业学院 · 515宿舍<br>01:17，宿舍群里出现了一位没人认识的成员。<br>她说：小王，今晚别开门。</div>
+    <div class="warning">本作中的人物、失踪事件、聊天记录及超自然情节均为虚构，仅借用学校名称作为故事背景，不代表真实校园事件。</div>
+    <button id="startBtn">进入微信</button>
+    <button id="continueBtn" class="secondary hidden">继续上次进度</button>
+    <button id="resetBtn" class="secondary hidden">清除存档并重新开始</button>
+  </section>
+  <main id="game" class="hidden" style="display:flex;flex-direction:column;min-height:0;flex:1">
+    <header class="top">
+      <button class="iconbtn" id="backBtn" aria-label="返回">‹</button>
+      <div style="text-align:center;flex:1"><div class="title" id="headTitle">515宿舍群</div><div class="sub" id="headSub">5人 · 微信</div></div>
+      <button class="iconbtn" id="menuBtn" aria-label="菜单">⋯</button>
+    </header>
+    <div class="status" id="status">周三 01:17 · 手机电量 23%</div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="chat">聊天</button>
+      <button class="tab" data-tab="clues">线索</button>
+      <button class="tab" data-tab="people">联系人</button>
+      <button class="tab" data-tab="ending">档案</button>
+    </nav>
+    <section id="chatView">
+      <div class="chat" id="chat"></div>
+      <div class="composer"><div class="choices" id="choices"></div><div class="hint" id="hint">选择你的回复。每个决定都会留下痕迹。</div></div>
+    </section>
+    <section class="panel" id="cluesPanel"></section>
+    <section class="panel" id="peoplePanel"></section>
+    <section class="panel" id="endingPanel"></section>
+  </main>
+  <div class="flash" id="flash"></div>
+  <div class="overlay" id="modal"><div class="modal" id="modalContent"></div></div>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const STORE="wx515_horror_save_v1";
+const names={
+  me:{name:"小王（我）",avatar:"🧑🏻‍🎓"},
+  lin:{name:"林佳｜室友",avatar:"🧋"},
+  qiu:{name:"阿秋｜闺蜜",avatar:"🐱"},
+  chen:{name:"陈老师｜辅导员",avatar:"👩🏻‍💼"},
+  guard:{name:"值班室",avatar:"☎️"},
+  unknown:{name:"未知联系人",avatar:"🌑"},
+  group:{name:"515宿舍群",avatar:"🏠"},
+  archive:{name:"旧档案",avatar:"📁"},
+  system:{name:"系统提示",avatar:"▫️"}
+};
+const state={node:"start",history:[],clues:[],flags:{},trust:0,nerve:0,chapter:1,ending:null,seen:[],activeTab:"chat",time:"01:17"};
+function addClue(id,title,desc){if(!state.clues.some(c=>c.id===id)){state.clues.push({id,title,desc});}}
+function flag(k,v=true){state.flags[k]=v;}
+function say(who,text,opts={}){
+  state.history.push({who,text,kind:opts.kind||"text",time:opts.time||state.time,meta:opts.meta||""});
+  renderChat(true);
+}
+function note(text){say("system",text,{kind:"notice"});}
+function msg(who,text){say(who,text);}
+function me(text){say("me",text);}
+function voice(who,text,duration){say(who,text,{kind:"voice",meta:duration||"8″"});}
+function choices(arr,hint){renderChoices(arr,hint);}
+function setNode(n){state.node=n;save();renderChoices([]);updateStatus();renderPanels();}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(STORE)||"null");if(s&&s.history){Object.assign(state,s);return true;}}catch(e){}return false;}
+function updateStatus(){ $("status").textContent="周三 "+state.time+" · 手机电量 "+Math.max(4,23-state.history.length%19)+"%"; }
+function renderChat(scroll){
+ const box=$("chat");box.innerHTML="";
+ state.history.forEach((m,i)=>{
+  if(m.kind==="notice"){const d=document.createElement("div");d.className="notice";d.textContent=m.text;box.appendChild(d);return;}
+  if(i===0||state.history[i-1].time!==m.time){const t=document.createElement("div");t.className="time";t.textContent=m.time;box.appendChild(t);}
+  const who=names[m.who]||{name:m.who,avatar:"?"};
+  const row=document.createElement("div");row.className="msg"+(m.who==="me"?" me":"");
+  const av=document.createElement("div");av.className="avatar"+(m.who==="me"?" me":"");av.textContent=who.avatar;
+  const wrap=document.createElement("div");wrap.className="bubblewrap";
+  const nm=document.createElement("div");nm.className="name";nm.textContent=who.name;
+  const b=document.createElement("div");b.className="bubble"+(m.kind==="voice"?" voice":"");
+  if(m.kind==="voice"){b.innerHTML='<span class="voiceicon">◖)))</span>'+m.meta+'<small>点击播放语音转文字</small>';b.addEventListener("click",()=>{playTone();openModal("语音消息",m.text+"<br><br><span style='color:#888'>（语音由游戏内文字模拟，不包含真实录音）</span>");});}
+  else b.textContent=m.text;
+  wrap.append(nm,b);row.append(av,wrap);box.appendChild(row);
+ });
+ if(scroll)box.scrollTop=box.scrollHeight;
+}
+function renderChoices(arr,hint){
+ const box=$("choices");box.innerHTML="";
+ arr.forEach(c=>{const b=document.createElement("button");b.className="choice";b.textContent=c.label;b.onclick=()=>{if(c.action)c.action();};box.appendChild(b);});
+ $("hint").textContent=hint|| (arr.length?"你的选择可能改变结局。":"剧情记录已保存。");
+}
+function showTab(tab){
+ state.activeTab=tab;
+ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+ $("chatView").style.display=tab==="chat"?"flex":"none";
+ ["clues","people","ending"].forEach(t=>$(t+"Panel").classList.toggle("show",tab===t));
+ renderPanels();save();
+}
+function renderPanels(){
+ const cp=$("cluesPanel");
+ cp.innerHTML='<div class="card"><h3>线索档案</h3><p>小王收集到的证据会保存在这里。线索之间可能互相矛盾。</p></div>';
+ if(!state.clues.length)cp.innerHTML+='<div class="empty">还没有线索。<br>聊天、语音和选择都可能藏着信息。</div>';
+ state.clues.forEach(c=>{cp.innerHTML+='<div class="card"><div class="clue"><strong>'+esc(c.title)+'</strong><p>'+esc(c.desc)+'</p></div></div>';});
+ const pp=$("peoplePanel");
+ pp.innerHTML='<div class="card"><h3>联系人</h3><p>他们都声称自己了解515，但每个人的记忆似乎并不一致。</p></div>';
+ [["lin","林佳","室友 · 一直说515只有三个人住。"],["qiu","阿秋","闺蜜 · 她记得你曾提过一个叫“许棠”的人。"],["chen","陈老师","辅导员 · 坚称学校没有相关失踪记录。"],["guard","值班室","夜间值班电话 · 说法前后矛盾。"],["unknown","未知联系人","没有头像，没有朋友圈，账号注册时间显示：明天。"]].forEach(p=>pp.innerHTML+='<div class="card"><h3>'+p[1]+'</h3><p>'+p[2]+'</p></div>');
+ const ep=$("endingPanel");
+ ep.innerHTML='<div class="card"><h3>故事档案</h3><p>章节：'+state.chapter+'/5</p><p>已收集线索：'+state.clues.length+' 条</p><p>你的选择记录：'+state.history.filter(m=>m.who==="me").length+' 次</p><p>当前结局：'+(state.ending||"尚未揭晓")+'</p><p>心理状态：'+(state.nerve>=4?"高度紧张":state.nerve>=2?"不安":"尚能保持冷静")+'</p></div>';
+ if(state.ending){ep.innerHTML+='<div class="card"><h3>重新体验</h3><p>不同选择、线索和信任值会导向不同结局。</p><button class="smallbtn" id="replayBtn">重新开始</button></div>';setTimeout(()=>{const b=$("replayBtn");if(b)b.onclick=reset;},0);}
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function openModal(title,body,buttons){$("modalContent").innerHTML='<h2>'+esc(title)+'</h2><p>'+body+'</p>'+(buttons||'<button id="closeModal">知道了</button>');$("modal").classList.add("show");const b=$("closeModal");if(b)b.onclick=closeModal;}
+function closeModal(){$("modal").classList.remove("show");}
+function playTone(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=520;g.gain.value=.035;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.09);o.onended=()=>ctx.close();}catch(e){}}
+function scare(){ $("flash").classList.remove("go");void $("flash").offsetWidth;$("flash").classList.add("go");$("game").classList.add("glitch");setTimeout(()=>$("game").classList.remove("glitch"),850);playTone();}
+function goChapter(n){state.chapter=n;save();}
+function end(title,lines){
+ state.ending=title;note("—— "+title+" ——");
+ lines.forEach(x=>msg(x[0],x[1]));
+ msg("system","故事暂告一段落。你的进度已保存。");
+ setNode("ended");showTab("chat");
+ choices([{label:"查看结局档案",action:()=>showTab("ending")},{label:"重新开始（清除本局进度）",action:reset}],"你已抵达一个结局。重新开始可探索其他分支。");
+ renderPanels();save();
+}
+function reset(){localStorage.removeItem(STORE);state.node="start";state.history=[];state.clues=[];state.flags={};state.trust=0;state.nerve=0;state.chapter=1;state.ending=null;state.seen=[];state.time="01:17";state.activeTab="chat";$("intro").classList.remove("hidden");$("game").classList.add("hidden");$("continueBtn").classList.add("hidden");$("resetBtn").classList.add("hidden");closeModal();}
+function start(){ $("intro").classList.add("hidden");$("game").classList.remove("hidden");state.history=[];state.clues=[];state.flags={};state.trust=0;state.nerve=0;state.chapter=1;state.ending=null;state.node="start";state.time="01:17";showTab("chat");chapter1();}
+function resume(){ $("intro").classList.add("hidden");$("game").classList.remove("hidden");showTab(state.activeTab||"chat");renderChat(true);renderPanels();updateStatus();dispatchSavedNode();}
+function dispatchSavedNode(){
+ const map={start:chapter1,afterFirst:afterFirst,askRoommate:askRoommate,askFriend:askFriend,askTeacher:askTeacher,checkDoor:checkDoor,chapter2:chapter2,investigate:investigate,chapter3:chapter3,nightCall:nightCall,chapter4:chapter4,finalChoice:finalChoice,ended:()=>{renderPanels();choices([{label:"查看结局档案",action:()=>showTab("ending")},{label:"重新开始",action:reset}]);}};
+ (map[state.node]||chapter1)();
+}
+function chapter1(){
+ setNode("start");goChapter(1);
+ note("01:17 · 515宿舍群聊");
+ msg("group","林佳：谁把门口的外卖拿进来了？我没点。");
+ msg("group","阿敏：我也没点，门口放着一个纸袋。");
+ msg("group","林佳：……我们宿舍有阿敏吗？");
+ msg("lin","小王，你醒着吗？别在群里回她。");
+ msg("unknown","小王，你还在515吗？今晚不管谁敲门，都不要开。");
+ msg("unknown","尤其是听见有人叫你全名的时候。");
+ choices([
+  {label:"问未知联系人：你是谁？",action:()=>{me("你是谁？你怎么知道我在515？");state.nerve++;state.flags.askedUnknown=true;afterFirst();}},
+  {label:"先问林佳，群里的“阿敏”是谁",action:()=>{me("群里那个阿敏是谁？");state.trust++;state.flags.askedLin=true;askRoommate();}},
+  {label:"截图发给闺蜜阿秋",action:()=>{me("我把群聊截图发给阿秋。");state.flags.sentScreenshot=true;askFriend();}}
+ ],"第一反应很重要。暂时没有任何人承认认识那个名字。");
+}
+function afterFirst(){
+ setNode("afterFirst");msg("unknown","因为你昨天晚上已经问过我一次了。");
+ msg("unknown","你说：如果明天所有人都不记得她了，至少你会记得。");
+ choices([
+  {label:"追问“她”是谁",action:()=>{me("她是谁？");state.nerve++;msg("unknown","你真的不记得许棠了吗？");addClue("unknown","未知账号的消息","对方声称小王昨天已经和她聊过，并提到“许棠”。");chapter2();}},
+  {label:"拉黑对方",action:()=>{me("我把这个账号拉黑。");flag("blockedUnknown");msg("system","你已拉黑该联系人。");setTimeout(()=>{scare();},60);msg("unknown","（对方已被拉黑，但新消息仍然出现）");state.nerve+=2;addClue("blocked","无法拉黑的账号","拉黑后仍收到新消息，聊天页面没有显示解除拉黑。");chapter2();}},
+  {label:"先不回复，检查群成员",action:()=>{me("我没有回复，点开群成员列表。");flag("checkedGroup");addClue("groupCount","群成员列表","群聊显示5人，但头像数量只有4个；成员列表里一闪而过“许棠”。");chapter2();}}
+ ]);
+}
+function askRoommate(){
+ setNode("askRoommate");msg("lin","别提这个名字。我们寝室一直就三个人。");
+ msg("lin","小王，你最近是不是太累了？");
+ choices([
+  {label:"问她：你认识许棠吗？",action:()=>{me("你认识许棠吗？");msg("lin","……你从哪儿听到这个名字的？");state.flags.linKnows=true;addClue("linSlip","林佳的失言","林佳先否认这个人存在，却在听见名字后明显慌张。");chapter2();}},
+  {label:"不逼问，问门口纸袋",action:()=>{me("门口那个纸袋是谁的？");msg("lin","别碰它。里面是我们去年拍的合照。");state.flags.bag=true;addClue("paperBag","门口纸袋","林佳称纸袋里有去年合照，但你记得自己从没见过这张照片。");chapter2();}},
+  {label:"让她陪自己去看监控",action:()=>{me("陪我去值班室看看走廊监控。");state.flags.linAccompanies=true;state.trust++;msg("lin","好。但如果监控里出现第四个人，你别看她的脸。");addClue("monitorWarning","监控警告","林佳同意陪你查监控，却要求你不要看清画面中的第四个人。");chapter2();}}
+ ]);
+}
+function askFriend(){
+ setNode("askFriend");msg("qiu","你怎么突然问这个？许棠不是你大一刚开学认识的学姐吗？");
+ msg("qiu","等等……我刚才翻了我们的聊天记录，里面所有提到她的地方都变成了空白。");
+ voice("qiu","我不是开玩笑。你先把门锁好，我现在给你打电话。","12″");
+ choices([
+  {label:"让阿秋把她记得的事说清楚",action:()=>{me("别挂电话，告诉我你记得什么。");state.trust+=2;state.flags.friendTrust=true;addClue("friendMemory","阿秋的记忆","阿秋记得许棠是学姐，却发现旧聊天里所有相关内容都变成空白。");chapter2();}},
+  {label:"让阿秋联系辅导员",action:()=>{me("你帮我联系陈老师，问问许棠。");state.flags.friendContactTeacher=true;msg("qiu","好……老师刚刚回我：学校没有这个人。");addClue("teacherDenial","辅导员的否认","辅导员称学校没有许棠，但阿秋仍记得她是学姐。");chapter2();}},
+  {label:"不让她来，担心她也出事",action:()=>{me("你别来学校，待在家里。");state.flags.protectFriend=true;msg("qiu","那你答应我，天亮之前不要独自下楼。");state.trust++;chapter2();}}
+ ]);
+}
+function chapter2(){
+ setNode("chapter2");goChapter(2);state.time="01:24";
+ note("第一章结束 · 走廊灯闪了三次");
+ msg("lin","小王，你听见没有？门外有人在用指甲刮门。");
+ msg("system","咔。咔。咔。");
+ scare();
+ msg("unknown","开门呀。是我。你不是说过会来接我吗？");
+ choices([
+  {label:"贴近猫眼查看",action:()=>{me("我走到门边，透过猫眼往外看。");state.flags.peeped=true;state.nerve++;checkDoor();}},
+  {label:"退后，先联系值班室",action:()=>{me("我退回床边，拨打值班室电话。");state.flags.calledGuard=true;nightCall();}},
+  {label:"问林佳为什么知道门外有人",action:()=>{me("你怎么知道门外有人？");msg("lin","因为我刚刚看见她从你床底下爬出来。");state.nerve+=2;state.flags.linSaw=true;addClue("underBed","床底的影子","林佳声称看见有人从小王床底爬出，但小王没有听到任何动静。");investigate();}}
+ ]);
+}
+function checkDoor(){
+ setNode("checkDoor");msg("system","猫眼里是一段空荡荡的走廊。声控灯亮着，却没有人。");
+ msg("unknown","（语音通话）小王，你为什么站在门后面？");
+ voice("unknown","我看见你了。你身后那张床，今晚睡着四个人。","6″");
+ scare();
+ choices([
+  {label:"立刻离开门边，检查床铺",action:()=>{me("我猛地退开，数了一遍床铺。");state.flags.countedBeds=true;addClue("fourthBed","第四个枕头","宿舍只有三张床，但小王看见自己的床边多出一个湿漉漉的枕头。");investigate();}},
+  {label:"把猫眼拍下来发给阿秋",action:()=>{me("我拍下猫眼外的走廊，发给阿秋。");state.flags.photo=true;msg("qiu","照片里不是走廊……是你们宿舍里面。");addClue("insidePhoto","不可能的照片","拍摄走廊的照片却显示宿舍内部，照片角落有一个模糊的人影。");investigate();}},
+  {label:"回应门外的人：我不认识你",action:()=>{me("我不认识你。");msg("unknown","那你为什么把我的名字写在床板下面？");state.nerve+=2;addClue("bedName","床板下的名字","未知联系人说床板下写着许棠的名字。");investigate();}}
+ ]);
+}
+function nightCall(){
+ setNode("nightCall");msg("guard","值班室。");
+ msg("me","515门外有人敲门，走廊监控能看一下吗？");
+ msg("guard","515？同学，你们楼层没有515。");
+ msg("guard","你先看看门牌。别相信手机显示的东西。");
+ choices([
+  {label:"打开手机相机拍下门牌",action:()=>{me("我打开相机，对准门牌。");state.flags.doorPhoto=true;msg("system","相机画面里，门牌是“514”。但你抬头看时，门牌仍然写着515。");addClue("doorNumber","变化的门牌","相机显示514，肉眼看到515。");investigate();}},
+  {label:"要求值班室派人来",action:()=>{me("麻烦你现在过来一趟。");msg("guard","我已经在你们门口了。");msg("system","电话里传来三下敲门声。");state.nerve+=2;scare();choices([{label:"开免提，问他在哪里",action:()=>{me("你现在在哪？");msg("guard","就在门外。别开门。");addClue("guardLoop","电话里的敲门声","值班室说自己就在门外，同时要求小王不要开门。");investigate();}},{label:"挂断电话，找其他线索",action:()=>{me("我挂断电话。");investigate();}}]);}},
+  {label:"挂断，给陈老师发消息",action:()=>{me("我挂断电话，联系陈老师。");askTeacher();}}
+ ]);
+}
+function askTeacher(){
+ setNode("askTeacher");msg("chen","小王，现在是凌晨。有什么事明天再说。");
+ msg("me","老师，学校里有没有一个叫许棠的学生？");
+ msg("chen","没有。我们学院从来没有这个学生。");
+ msg("chen","另外，你们515宿舍的床位登记只有三个人。你最近是不是睡眠不好？");
+ choices([
+  {label:"要求查看床位登记表",action:()=>{me("我想看一下床位登记表。");msg("chen","我发你一张照片。你看完就删掉。");addClue("roster","床位登记表","登记表只有三人，但最右侧有被涂黑的第四行，纸张日期比其他记录早一年。");state.flags.roster=true;investigate();}},
+  {label:"问她为什么让自己删照片",action:()=>{me("为什么看完要删掉？");msg("chen","因为那不是给你看的。");state.flags.teacherSuspicious=true;state.nerve++;addClue("teacherWarning","老师的警告","陈老师反复要求小王不要查看记录，却没有解释原因。");investigate();}},
+  {label:"假装相信她，继续套话",action:()=>{me("好吧，可能是我记错了。");state.flags.teacherTrust=true;msg("chen","很好。明天早上，你就会完全想起来了。");addClue("tomorrow","明早的承诺","陈老师说小王明天会完全想起来，但没有说明是什么。");investigate();}}
+ ]);
+}
+function investigate(){
+ setNode("investigate");goChapter(3);state.time="01:36";
+ note("第二章 · 你决定调查宿舍");
+ msg("system","手机亮起，屏幕上多了一张你不记得拍过的照片。");
+ msg("unknown","你找到几条线索了？别只相信一个人的话。");
+ choices([
+  {label:"检查床底和床板",action:()=>{me("我打开手电筒，检查床底和床板。");state.flags.checkedBed=true;addClue("scratchedName","床板刻痕","床板内侧有反复刮擦的字：许棠。下面还有一句：别让她替你留下。");msg("system","手电光扫过床底时，那里有一只湿手慢慢缩了回去。");scare();chapter3();}},
+  {label:"翻找旧群聊和照片",action:()=>{me("我翻找手机里一年前的群聊和相册。");state.flags.checkedPhone=true;addClue("oldPhoto","被抹去的合照","旧合照里明明有四个人，但每次点开，第四个人的脸都会变成小王自己的脸。");msg("system","相册里有一张照片，拍摄日期是明天。");scare();chapter3();}},
+  {label:"把已有线索发给阿秋",action:()=>{me("我把所有线索发给阿秋。");state.flags.sharedClues=true;state.trust+=2;msg("qiu","我想起来了……许棠最后一次出现，是在你们宿舍停电那晚。");addClue("blackout","停电那一夜","阿秋记得许棠最后一次出现是在宿舍停电的夜晚。");chapter3();}}
+ ]);
+}
+function chapter3(){
+ setNode("chapter3");goChapter(3);state.time="01:48";
+ note("第三章 · 语音通话");
+ msg("lin","我得告诉你一件事。但你听完之后，别再叫我的名字。");
+ voice("lin","我不是第一次住在515。每年到了这一天，都会有一个人被大家忘掉。","17″");
+ msg("lin","去年是许棠。今年……我不确定是不是你。");
+ choices([
+  {label:"相信林佳，问她去年发生了什么",action:()=>{me("我相信你。去年到底发生了什么？");state.trust+=2;state.flags.trustLin=true;msg("lin","去年停电后，许棠说她听见有人在门外叫她。她开了门，第二天我们都不记得她。");addClue("linStory","林佳的回忆","林佳说许棠在停电夜开门后消失，所有人的记忆随后被改写。");chapter4();}},
+  {label:"质问她：你到底是不是林佳",action:()=>{me("你到底是不是林佳？");state.nerve+=2;msg("lin","如果我不是，你刚才为什么一直听我的话？");flag("suspectLin");addClue("linIdentity","林佳身份疑点","林佳无法证明身份，反而质问小王为何相信她。");chapter4();}},
+  {label:"录下语音，发给陈老师",action:()=>{me("我把这段语音录下来，发给陈老师。");state.flags.sentVoice=true;msg("chen","这段录音里只有你一个人的声音。");addClue("emptyVoice","只有一个人的录音","辅导员听到的录音只有小王的声音，林佳的语音消失了。");chapter4();}}
+ ]);
+}
+function chapter4(){
+ setNode("chapter4");goChapter(4);state.time="02:03";
+ note("第四章 · 走廊监控");
+ msg("unknown","最后一条规则：如果你看见监控里的自己，不要回头。");
+ msg("system","值班室发来一段7秒的监控视频。");
+ voice("guard","你们宿舍门口一直只有一个人。她站了两个小时。","7″");
+ choices([
+  {label:"打开视频，仔细看时间戳",action:()=>{me("我打开视频，先看时间戳。");state.flags.video=true;addClue("timestamp","监控时间戳","监控时间是明天凌晨02:03，画面中的小王正拿着手机看这条视频。");scare();finalChoice();}},
+  {label:"不看视频，要求对方说出门牌号",action:()=>{me("你说出门牌号，我才相信你。");msg("guard","515。");msg("guard","不对……是你身后的那个数字。");state.nerve++;addClue("behindNumber","身后的数字","值班室提到小王身后的数字，却没有解释是什么。");finalChoice();}},
+  {label:"立刻把视频转发给阿秋",action:()=>{me("我把视频转发给阿秋。");state.flags.videoFriend=true;msg("qiu","小王，视频里你身后站着一个人。她跟你长得一模一样。");addClue("double","另一个小王","视频里出现与小王相同的身影，动作比现实中的小王慢一秒。");scare();finalChoice();}}
+ ]);
+}
+function finalChoice(){
+ setNode("finalChoice");goChapter(5);state.time="02:17";
+ note("第五章 · 门外传来自己的声音");
+ msg("unknown","你现在有足够的线索了。门外的人不是许棠。");
+ msg("unknown","她只是第一个被你忘掉的人。");
+ msg("unknown","小王，真正被忘掉的人……一直是你。");
+ choices([
+  {label:"相信阿秋：保持门锁，等天亮",action:()=>{me("我相信阿秋。我锁好门，等到天亮。");if(state.trust>=2||state.flags.friendTrust||state.flags.sharedClues){end("结局一：天亮以后", [["qiu","我记得你。无论他们怎么说，我都记得你。"],["system","窗外泛白。宿舍门牌终于变回515。你打开相册，四个人的合照恢复了。"],["unknown","这次，你没有开门。"]]);}else{end("结局二：空白床位",[["chen","早上好，小王。你今天看起来精神好多了。"],["system","点名册上只剩三个人。你的名字也被划掉了。手机屏幕亮起一条新消息：小王，你还在515吗？"]]);}}},
+  {label:"相信林佳：按她说的，找床板下的字",action:()=>{me("我相信林佳，翻开床板。");if(state.flags.checkedBed||state.clues.some(c=>c.id==="scratchedName")){end("结局三：留下名字",[["lin","你终于想起来了。去年你没有救她，今年你可以救一个人。"],["system","你用指甲把“许棠”刻得更深。门外的敲击声停了。"],["unknown","谢谢你……这一次，我终于有名字了。"]]);}else{end("结局四：替身",[["system","床板下面什么都没有。你听见身后有人轻轻说：找到你了。"],["unknown","明天，他们会记得你曾经存在过吗？"]]);}}},
+  {label:"把所有证据发给陈老师，要求公开记录",action:()=>{me("我把线索全部发给陈老师，要求公开记录。");if(state.clues.length>=4&&state.flags.roster){end("隐藏结局：第四行",[["chen","我本来以为，只要没人记得，就不会再发生。"],["system","登记表的第四行慢慢显现出一个名字：许棠。下面还有一行：小王。"],["unknown","记录留下了。现在，你也要留下来。"],["system","天亮后，档案柜里多了一份旧档案。封面写着：515。"]]);}else{end("结局五：未完成的报告",[["chen","证据不足。你需要休息。"],["system","聊天记录自动清空。你记得自己找到了真相，却再也说不清它是什么。"]]);}}},
+  {label:"打开门，问门外的人到底是谁",action:()=>{me("我解开门锁，打开门。");scare();end("结局六：请进",[["system","门外空无一人。走廊尽头的镜子里，你看见自己还站在门内。"],["unknown","谢谢你终于让我进来了。"],["system","门轻轻关上。群聊里多了一个成员：小王。"]]);}}
+ ]);
+}
+function dispatch(){
+ if(state.node==="start")chapter1();
+}
+$("startBtn").addEventListener("click",start);
+$("continueBtn").addEventListener("click",resume);
+$("resetBtn").addEventListener("click",()=>openModal("重新开始","清除当前存档并从头开始？",'<button id="yesReset">清除存档</button><button id="closeModal" style="background:#ddd;color:#222">取消</button>'));
+$("menuBtn").addEventListener("click",()=>openModal("游戏菜单",'<strong>《515：熄灯后，请勿开门》</strong><br><br>单机离线文游 · 自动保存<br>已收集线索：'+state.clues.length+' 条<br>当前章节：'+state.chapter+'/5<br><br>提示：线索不一定是真相，角色也可能记错。','<button id="saveClose">保存并返回</button><button id="closeModal" style="background:#ddd;color:#222">关闭</button>'));
+$("backBtn").addEventListener("click",()=>{if(state.activeTab!=="chat")showTab("chat");else openModal("暂时离开？","进度会自动保存在当前设备。");});
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+$("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal();});
+document.addEventListener("click",e=>{if(e.target.id==="yesReset")reset();if(e.target.id==="saveClose"){save();closeModal();}});
+if(load()){$("continueBtn").classList.remove("hidden");$("resetBtn").classList.remove("hidden");}
+})();
+</script>
+</body>
+</html>
